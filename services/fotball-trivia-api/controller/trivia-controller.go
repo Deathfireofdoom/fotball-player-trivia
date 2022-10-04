@@ -23,7 +23,7 @@ func NewTriviaController(service service.TriviaService) TriviaController {
 func (tc triviaController) GetPlayerTrivia(ctx *gin.Context) (int, entity.PlayerTrivia) {
 	playerParam, ok := ctx.GetQuery("name")
 	if ok {
-		playerTrivia, err := tc.service.GetPlayerTrivia(playerParam)
+		playerTrivia, err := tc.service.GetPlayerTrivia(playerParam, ctx)
 		if err != nil {
 			panic("Failed at getting player trivia.")
 		}

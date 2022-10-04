@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Deathfireofdoom/fotball-player-trivia/controller"
+	redisClient "github.com/Deathfireofdoom/fotball-player-trivia/redis"
 	"github.com/Deathfireofdoom/fotball-player-trivia/service"
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ var (
 
 func main() {
 	server := gin.Default()
+	redisClient.InitializeRedis()
 
 	// Get player trivia
 	server.GET("/player-trivia", func(ctx *gin.Context) {
