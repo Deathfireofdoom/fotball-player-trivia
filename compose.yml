@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  fotballdb:
+    image: "postgres:14-alpine"
+    environment:
+      POSTGRES_PASSWORD: "superDevPassword"
+      POSTGRES_USER: "user"
+      POSTGRES_DB: "dev"
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    image: "redis:latest"
+
+    ports:
+      - "6379:6379"
