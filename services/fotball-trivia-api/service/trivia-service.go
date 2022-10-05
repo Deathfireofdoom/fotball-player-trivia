@@ -45,7 +45,22 @@ func (ts *triviaService) GetPlayerTrivia(playerName string, ctx *gin.Context) (e
 	return playerTrivia, nil
 }
 
+// MockGetTrivia just a mock function to get trivia, should be replaced soon.
 func MockGetTrivia(playerName string) (entity.PlayerTrivia, error) {
 	time.Sleep(time.Duration(2) * time.Second) // Simulate some kind of delay.
 	return entity.PlayerTrivia{Name: playerName, Country: "Test"}, nil
+}
+
+func FetchTrivia(playerName string) (entity.PlayerTrivia, error) {
+	panic("Implement this.")
+	// 1. Fetch country for the player from DB.
+
+	// This part should be concurrent.
+	// 2.1.1 Make API call to get Land area and Population for the players country.
+	// 2.1.2 Do stupid calculation on Area of land and Percentage of population.
+
+	// 2.2.1 Make api call to get official name of country from restcountriesapi, ex. Kingdom of Sweden
+
+	// 3. Wait for all to finish, then make playerTrivia and return it.
+
 }
