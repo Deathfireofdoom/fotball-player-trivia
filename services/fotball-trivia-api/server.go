@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Deathfireofdoom/fotball-player-trivia/controller"
+	"github.com/Deathfireofdoom/fotball-player-trivia/database"
 	"github.com/Deathfireofdoom/fotball-player-trivia/entity"
 	redisClient "github.com/Deathfireofdoom/fotball-player-trivia/redis"
 	"github.com/Deathfireofdoom/fotball-player-trivia/service"
@@ -20,6 +21,8 @@ var (
 func main() {
 	server := gin.Default()
 	redisClient.InitializeRedis()
+
+	database.StartBatchProcessExample()
 
 	// Get player trivia
 	server.GET("/player-trivia", func(ctx *gin.Context) {
