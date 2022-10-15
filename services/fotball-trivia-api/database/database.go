@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/Deathfireofdoom/fotball-player-trivia/entity"
+	"github.com/Deathfireofdoom/fotball-player-trivia/utils"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -29,6 +32,7 @@ type DatabaseService interface {
 	PingDB() error
 	migrateDB() error
 	GetPlayerInfo(string) (entity.PlayerInfoDB, error)
+	LoadPlayerData() error
 }
 
 type databaseService struct {
@@ -95,6 +99,49 @@ func (ds *databaseService) GetPlayerInfo(playerName string) (entity.PlayerInfoDB
 	}
 
 	return playerInfoDB, nil
+}
+
+func (ds *databaseService) LoadPlayerData() error {
+	// Create table.
+	createTableSql := "CREATE TABLE IF NOT EXISTS player_info( name TEXT, height INT, weight INT, country TEXT) "
+	ds.db.Exec(createTableSql)
+
+	// Start batch processing.
+	filePath := "/Users/oskarelvkull/Documents/big-corp/fotball-player-trivia/services/fotball-trivia-api/database/data/player-data-set.csv"
+	utils.BatchProcessFile(filePath, ds.loadBatch, 1, 500)
+	return nil
+}
+
+func (ds *databaseService) loadBatch(batch []string) {
+	// Sql used for insert.
+	insertSql := "INSERT INTO player_info (name, height, weight, country) VALUES ($1, $2, $3, $4)"
+
+	// Extract the value.
+	valuesList := [][]string{}
+	for _, line := range batch {
+		valuesList = append(valuesList, parseLine(line))
+	}
+	fmt.Println(valuesList)
+	for _, values := range valuesList {
+		//ds.db.Exec(insertSql, values)
+		fmt.Println(values[0], values[1], values[2], values[3], insertSql)
+		height, err := strconv.Atoi(values[1])
+		if err != nil {
+			panic("ERROR")
+		}
+		weight, err := strconv.Atoi(values[2])
+		if err != nil {
+			panic("ERROR")
+		}
+
+		ds.db.Exec(insertSql, values[0], height, weight, values[3])
+
+	}
+
+}
+
+func parseLine(line string) []string {
+	return strings.Split(line, ",")
 }
 
 //https://codewithyury.com/golang-wait-for-all-goroutines-to-finish/

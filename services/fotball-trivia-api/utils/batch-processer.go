@@ -75,6 +75,7 @@ func consumer(wg *sync.WaitGroup, batchProcess func([]string), batchCh chan []st
 	for {
 		select {
 		case batch := <-batchCh:
+			fmt.Println("Processing")
 			if batch != nil {
 				batchProcess(batch)
 			} else {

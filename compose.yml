@@ -15,3 +15,4 @@ services:
 
     ports:
       - "6379:6379"
+  #docker-compose exec fotballdb psql dev -U user --password superDevPassword 
