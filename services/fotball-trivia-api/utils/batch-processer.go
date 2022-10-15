@@ -4,8 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 )
+
+func StartBatchProcessExample() {
+	filePath := "/Users/oskarelvkull/Documents/big-corp/fotball-player-trivia/services/fotball-trivia-api/database/data/player-data-set.csv"
+	BatchProcessFile(filePath, ExampleBatchProcess, 1, 10)
+
+}
 
 // BatchProcessFile takes a file and a function to apply on each line.
 func BatchProcessFile(filePath string, batchProcess func([]string), concurrency, batchSize int) {
@@ -84,7 +91,12 @@ func consumer(wg *sync.WaitGroup, batchProcess func([]string), batchCh chan []st
 
 // ExampleBatchProcess is just an example how a batchProcess function could look like.
 func ExampleBatchProcess(batch []string) {
-	for line := range batch {
-		fmt.Println(line)
+	for _, line := range batch {
+		values := parseLine(line)
+		fmt.Println(values)
 	}
+}
+
+func parseLine(line string) []string {
+	return strings.Split(line, ",")
 }
