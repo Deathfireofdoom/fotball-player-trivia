@@ -26,7 +26,6 @@ func GetPlayerTriva(playerName string, ctx *gin.Context) (entity.PlayerTrivia, e
 
 		// Hit in cache
 		if err == nil {
-			fmt.Println("HITING CACHE")
 			return playerTrivia, nil
 		}
 	}
@@ -34,8 +33,6 @@ func GetPlayerTriva(playerName string, ctx *gin.Context) (entity.PlayerTrivia, e
 	// No hit in cache
 	playerTrivia, err = generatePlayerTrivia(playerName)
 	if err != nil {
-		fmt.Println("ERROR - generatePlayerTrivia")
-		fmt.Println(err)
 		return entity.PlayerTrivia{}, fmt.Errorf("could not generate trivia: %w", err)
 	}
 
@@ -46,7 +43,6 @@ func GetPlayerTriva(playerName string, ctx *gin.Context) (entity.PlayerTrivia, e
 			return playerTrivia, fmt.Errorf("could not save playerInfo into cache: %w", err)
 		}
 	}
-	fmt.Println("About to return")
 	return playerTrivia, nil
 }
 
@@ -54,7 +50,7 @@ func generatePlayerTrivia(playerName string) (entity.PlayerTrivia, error) {
 	// Fetch country, height and weight from DB.
 	playerInfo, err := db.GetPlayerInfo(playerName)
 	if err != nil {
-		return entity.PlayerTrivia{}, fmt.Errorf("could not get player-info from DB: %w", &err)
+		return entity.PlayerTrivia{}, fmt.Errorf("could not get player-info from DB: %w", err)
 	}
 
 	// Makes channel to get results from go-routines.

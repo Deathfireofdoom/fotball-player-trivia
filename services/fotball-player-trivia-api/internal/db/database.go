@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/logger"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -30,19 +31,20 @@ func (c *Config) getConnstring() string {
 
 func InitDB(c Config) error {
 	var err error
+	logger.InfoLogger.Println("Initializing postgres db.")
+	logger.InfoLogger.Println("Opening connection to postgres db.")
 	db, err = sql.Open("pgx", c.getConnstring())
-	fmt.Println(c.getConnstring())
 	if err != nil {
-		fmt.Println("Could not open to db.")
-		fmt.Println(err)
-		return fmt.Errorf("Could not connect to db: %w", err)
+		logger.ErrorLogger.Println("Could not open connection to db: %w", err)
+		return fmt.Errorf("could not connect to postgres-db: %w", err)
 	}
 
+	logger.InfoLogger.Println("Pinging postgres...")
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("Could not ping to db.")
+		logger.ErrorLogger.Println("Could not ping postgres db: %w", err)
 		return fmt.Errorf("Could not ping db: %w", err)
 	}
-	fmt.Println("Reached db")
+	logger.InfoLogger.Println("Succesfully connected to postgres DB.")
 	return nil
 }
