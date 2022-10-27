@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/db"
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/logger"
 	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/redis"
 	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/router"
 )
@@ -15,8 +16,13 @@ func main() {
 
 func init() {
 	// Initialize
+	logger.InfoLogger.Println("Initializing database.")
 	initializeDB()
+	logger.InfoLogger.Println("Successfully initialized database.")
+
+	logger.InfoLogger.Println("Initializing redis.")
 	initializeRedis()
+	logger.InfoLogger.Println("Successfully initialized redis.")
 }
 
 func initializeRedis() {
