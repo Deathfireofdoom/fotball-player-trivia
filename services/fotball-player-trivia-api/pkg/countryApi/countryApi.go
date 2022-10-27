@@ -12,7 +12,7 @@ var (
 
 func GetCountryInfo(countryName string) (CountryInfo, error) {
 	// Setting up request.
-	URL := fmt.Sprintf("https://api-ninjas.com/v1/country?name=%s", countryName)
+	URL := fmt.Sprintf("https://api.api-ninjas.com/v1/country?name=%s", countryName)
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", URL, nil)
 	req.Header = http.Header{"X-Api-key": {apiKey}}
@@ -24,6 +24,7 @@ func GetCountryInfo(countryName string) (CountryInfo, error) {
 	defer resp.Body.Close()
 
 	var response ResponseApiNinja
+	fmt.Println(resp.Body)
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		return CountryInfo{}, fmt.Errorf("Could not parse resposne from Ninja api: %w", err)

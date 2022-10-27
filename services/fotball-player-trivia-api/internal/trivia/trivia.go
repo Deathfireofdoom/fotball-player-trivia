@@ -4,37 +4,57 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/db"
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/entity"
 	"github.com/Deathfireofdoom/fotball-player-trivia-api/internal/redis"
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/pkg/countryApi"
 	"github.com/Deathfireofdoom/fotball-player-trivia-api/pkg/restCountries"
+	"github.com/Deathfireofdoom/fotball-player-trivia-api/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func GetPlayerTriva(playerName string, ctx *gin.Context) (PlayerTrivia, error) {
+func GetPlayerTriva(playerName string, ctx *gin.Context) (entity.PlayerTrivia, error) {
 	// Checks if playerName's fun fact is already in redis-cache.
 	// GetTrivia will return err = nil if playerTrivia was found, otherwise it will return error.
-	playerTrivia, err := redis.Client.GetTrivia(ctx, playerName)
+	var err error
+	var playerTrivia entity.PlayerTrivia
 
-	// Hit in cache
-	if err == nil {
-		return playerTrivia, nil
+	// Checks if redis client is initialized, if not, this mean that redis was not reachable.
+	// Still works but without the caching mechanism.
+	if redis.Client != nil {
+		playerTrivia, err := redis.Client.GetTrivia(ctx, playerName)
+
+		// Hit in cache
+		if err == nil {
+			fmt.Println("HITING CACHE")
+			return playerTrivia, nil
+		}
 	}
 
 	// No hit in cache
 	playerTrivia, err = generatePlayerTrivia(playerName)
 	if err != nil {
-		return PlayerTrivia{}, fmt.Errorf("Could not generate trivia: %w", err)
+		fmt.Println("ERROR - generatePlayerTrivia")
+		fmt.Println(err)
+		return entity.PlayerTrivia{}, fmt.Errorf("could not generate trivia: %w", err)
 	}
 
-	// Saves generated playerTrivia in cache for next time.
-	err = redis.Client.SaveTrivia(ctx, playerTrivia, 25)
-
+	if redis.Client != nil {
+		// Saves generated playerTrivia in cache for next time.
+		err = redis.Client.SaveTrivia(ctx, playerTrivia, 25)
+		if err != nil {
+			return playerTrivia, fmt.Errorf("could not save playerInfo into cache: %w", err)
+		}
+	}
+	fmt.Println("About to return")
+	return playerTrivia, nil
 }
 
-func generatePlayerTrivia(playerName string) (PlayerTrivia, error) {
+func generatePlayerTrivia(playerName string) (entity.PlayerTrivia, error) {
 	// Fetch country, height and weight from DB.
 	playerInfo, err := db.GetPlayerInfo(playerName)
 	if err != nil {
-		return PlayerTrivia{}, fmt.Errorf("Could not get player-info from DB: %w", &err)
+		return entity.PlayerTrivia{}, fmt.Errorf("could not get player-info from DB: %w", &err)
 	}
 
 	// Makes channel to get results from go-routines.
@@ -43,13 +63,13 @@ func generatePlayerTrivia(playerName string) (PlayerTrivia, error) {
 
 	// Starts go routines.
 	go getOfficialName(playerInfo.Country, chanOfficialName)
-	go calculateFunFacts(playerInfo.Country, playerInfo.height, playerInfo.weight)
+	go calculateFunFacts(playerInfo.Country, playerInfo.Height, playerInfo.Weight, chanFunFacts)
 
 	// Waits for routines to finnish.
 	officialName := <-chanOfficialName
 	funFact := <-chanFunFacts
 
-	return PlayerTrivia{
+	return entity.PlayerTrivia{
 		Name:                playerName,
 		Country:             playerInfo.Country,
 		CountryOfficialName: officialName,
@@ -66,22 +86,23 @@ func getOfficialName(countryName string, out chan<- string) {
 	if err != nil {
 		panic("Implement this.")
 	}
-	out <- officialName
+	out <- officalName
 }
 
 func calculateFunFacts(countryName string, height, weight float64, out chan<- CalculatedFunFact) {
 	// First we need to get the area and population of the country, this info we get from ApiNinja
-	panic("Implement this.")
+
+	countryInfo, err := countryApi.GetCountryInfo(countryName)
 	if err != nil {
-		panic("ERROR")
+		panic(err)
 	}
 
 	var calculatedFunFact CalculatedFunFact
 	// Calculating share of population
-	//calculatedFunFact.ShareOfPopulation = calculateShareOfPopulation(countryApiNinjaInfo.Population)
+	calculatedFunFact.ShareOfPopulation = calculateShareOfPopulation(countryInfo.Population)
 
 	// Calculating area of coverage
-	//calculatedFunFact.SkinCoverageOfCountry = calculateSkinAreaCoverage(height, weight, countryApiNinjaInfo.SurfaceArea)
+	calculatedFunFact.SkinCoverageOfCountry = calculateSkinAreaCoverage(height, weight, countryInfo.SurfaceArea)
 
 	// Sends back facts into channel.
 	out <- calculatedFunFact

@@ -21,5 +21,5 @@ func GetOfficalName(countryName string) (string, error) {
 		return "", fmt.Errorf("Could not parse response from Restcountries-api: %w", err)
 	}
 
-	return response[0].Name.OffialName, nil
+	return response[0].Name.OfficialName, nil
 }

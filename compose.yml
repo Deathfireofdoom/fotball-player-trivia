@@ -12,7 +12,14 @@ services:
 
   redis:
     image: "redis:latest"
-
     ports:
       - "6379:6379"
+
+  fotball-trivia:
+    build: ./services/fotball-player-trivia-api/
+    env_file: ./.env
+    depends_on:
+      - fotballdb
+    ports:
+      - "8080:8080"
   #docker-compose exec fotballdb psql dev -U user --password superDevPassword 
