@@ -9,6 +9,7 @@ func Configure() *gin.Engine {
 
 	router.GET("/player-trivia", getPlayerTrivia)
 	router.GET("/test", connectionTest)
+	router.GET("/migrate", migrateDatabase)
 
 	return router
 }

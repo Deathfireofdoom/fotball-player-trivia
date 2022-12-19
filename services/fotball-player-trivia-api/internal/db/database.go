@@ -43,7 +43,7 @@ func InitDB(c Config) error {
 	err = db.Ping()
 	if err != nil {
 		logger.ErrorLogger.Println("Could not ping postgres db: %w", err)
-		return fmt.Errorf("Could not ping db: %w", err)
+		return fmt.Errorf("could not ping db: %w", err)
 	}
 	logger.InfoLogger.Println("Succesfully connected to postgres DB.")
 	return nil

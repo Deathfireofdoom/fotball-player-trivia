@@ -51,12 +51,14 @@ func initializeDB() {
 
 	db_user := os.Getenv("DB_USER")
 	if db_user == "" {
-		panic("no username for database was supplied in env.")
+		db_user = "user"
+		//panic("no username for database was supplied in env.")
 	}
 
 	db_password := os.Getenv("DB_PASSWORD")
 	if db_password == "" {
-		panic("no password for database was supplied in env.")
+		db_password = "superDevPassword"
+		//panic("no password for database was supplied in env.")
 	}
 
 	db_default_db := os.Getenv("DB_DEFAULT_DB")
